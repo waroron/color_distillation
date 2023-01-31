@@ -10,22 +10,28 @@
 }
 ```
 
-
 ## Overview
-We release the PyTorch code for ColorCNN, a newly introduced architecture in our paper *[Learning to Structure an Image with Few Colors](https://hou-yz.github.io/publication/2019-cvpr2020-colorcnn)*.
-![system overview](https://hou-yz.github.io/images/ColorCNN_system.png "System overview of image color quantization with ColorCNN.")
- 
-## Content
-- [Dependencies](#dependencies)
-- [Data Preparation](#data-preparation)
-- [Code](#code)
-    * [Training Classifiers](#training-classifiers)
-    * [Training & Evaluating ColorCNN](#training-&-evaluating-colorcnn)
-    * [Evaluating Traditional Methods](#evaluating-traditional-methods)
 
+We release the PyTorch code for ColorCNN, a newly introduced architecture in our paper _[Learning to Structure an Image with Few Colors](https://hou-yz.github.io/publication/2019-cvpr2020-colorcnn)_.
+![system overview](https://hou-yz.github.io/images/ColorCNN_system.png "System overview of image color quantization with ColorCNN.")
+
+## Content
+
+- [Learning to Structure an Image with Few Colors \[Website\] \[arXiv\]](#learning-to-structure-an-image-with-few-colors-website-arxiv)
+  - [Overview](#overview)
+  - [Content](#content)
+  - [Dependencies](#dependencies)
+  - [Data Preparation](#data-preparation)
+  - [Code](#code)
+    - [Training Classifiers](#training-classifiers)
+    - [Training \& Evaluating ColorCNN](#training--evaluating-colorcnn)
+    - [Evaluating Traditional Methods](#evaluating-traditional-methods)
+    - [Environment setup](#environment-setup)
 
 ## Dependencies
+
 This code uses the following libraries
+
 - python 3.7+
 - pytorch 1.4+ & torchvision
 - numpy
@@ -34,23 +40,25 @@ This code uses the following libraries
 - opencv-python
 
 ## Data Preparation
-By default, all datasets are in `~/Data/`. We use CIFAR10, CIFAR100, STL10, and tiny-imagenet-200 in this project. 
-The first three datasets can be automatically downloaded. 
 
-Tiny-imagenet-200 can be downloaded from this [link](http://cs231n.stanford.edu/tiny-imagenet-200.zip). 
-Once downloaded, please extract the zip files under `~/Data/tiny200/`. 
+By default, all datasets are in `~/Data/`. We use CIFAR10, CIFAR100, STL10, and tiny-imagenet-200 in this project.
+The first three datasets can be automatically downloaded.
+
+Tiny-imagenet-200 can be downloaded from this [link](http://cs231n.stanford.edu/tiny-imagenet-200.zip).
+Once downloaded, please extract the zip files under `~/Data/tiny200/`.
 Then, run `python color_distillation/utils/tiny_imagenet_val_reformat.py` to reformat the validation set. (thank [@tjmoon0104](https://github.com/tjmoon0104/Tiny-ImageNet-Classifier/blob/master/utils/tiny-imgnet-val-reformat.ipynb) for his code).
 
 Your `~/Data/` folder should look like this
+
 ```
 Data
 ├── cifar10/
 │   └── ...
-├── cifar100/ 
+├── cifar100/
 │   └── ...
 ├── stl10/
 │   └── ...
-└── tiny200/ 
+└── tiny200/
     ├── train/
     │   └── ...
     ├── val/
@@ -60,31 +68,46 @@ Data
 ```
 
 ## Code
+
 One can find classifier training & evaluation for traditional color quantization methods in `grid_downsample.py`.
-For ColorCNN training & evaluation, please find it in `color_cnn_downsample.py`. 
+For ColorCNN training & evaluation, please find it in `color_cnn_downsample.py`.
 
 ### Training Classifiers
-In order to train classifiers, please specify `'--train'` in the arguments. 
+
+In order to train classifiers, please specify `'--train'` in the arguments.
+
 ```shell script
 python grid_downsample.py -d cifar10 -a alexnet --train
-``` 
-One can run the shell script `bash train_classifiers.sh` to train AlexNet on all four datasets. 
+```
+
+One can run the shell script `bash train_classifiers.sh` to train AlexNet on all four datasets.
 
 ### Training & Evaluating ColorCNN
-Based on the original image pre-trained classifiers, we then train ColorCNN under specific color space sizes. 
+
+Based on the original image pre-trained classifiers, we then train ColorCNN under specific color space sizes.
+
 ```shell script
 python color_cnn_downsample.py -d cifar10 -a alexnet --num_colors 2
-``` 
-Please run the shell script `bash train_test_colorcnn.sh` to train and evaluate *ColorCNN* with AlexNet on all four datasets, under a 1-bit color space. 
+```
+
+Please run the shell script `bash train_test_colorcnn.sh` to train and evaluate _ColorCNN_ with AlexNet on all four datasets, under a 1-bit color space.
 
 ### Evaluating Traditional Methods
-Based on pre-trained classifiers, one can directly evaluate the performance of tradition color quantization methods. 
+
+Based on pre-trained classifiers, one can directly evaluate the performance of tradition color quantization methods.
+
 ```shell script
 python python grid_downsample.py -d cifar10 -a alexnet --num_colors 2 --sample_type mcut --dither
-``` 
-Please run the shell script `bash test_mcut_dither.sh` to evaluate *MedianCut+Dithering* with AlexNet on all four datasets, under a 1-bit color space. 
+```
 
+Please run the shell script `bash test_mcut_dither.sh` to evaluate _MedianCut+Dithering_ with AlexNet on all four datasets, under a 1-bit color space.
 
+### Environment setup
 
+```
+singularity pull ubuntu20.04.sif docker://ubuntu:20.04
+singularity build --sandbox color_quant ubuntu20.04.sif
 
-
+singularity shell --fakeroot --writable color_quant
+bash env_setup.sh
+```
